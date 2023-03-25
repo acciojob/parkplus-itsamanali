@@ -1,39 +1,43 @@
 package com.driver.model;
 
-
 import javax.persistence.*;
 
 @Entity
-@Table(name = "reservationTable")
 public class Reservation {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     private int numberOfHours;
 
+    //Mapping with user
     @ManyToOne
     @JoinColumn
     private User user;
 
+    //Mapping with spot
     @ManyToOne
     @JoinColumn
     private Spot spot;
 
+    //Mapping with payment, parent -reservation, child - payment
     @OneToOne
     @JoinColumn
     private Payment payment;
 
 
-    public Reservation(int id, int numberOfHours, User user, Spot spot) {
-        this.id = id;
+    public Reservation() {
+    }
+
+    public Reservation(int numberOfHours, User user, Spot spot, Payment payment) {
         this.numberOfHours = numberOfHours;
         this.user = user;
         this.spot = spot;
+        this.payment = payment;
     }
 
-    public Reservation() {
+    public Reservation(int numberOfHours) {
+        this.numberOfHours = numberOfHours;
     }
 
     public int getId() {

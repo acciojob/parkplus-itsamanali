@@ -3,33 +3,33 @@ package com.driver.model;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "Payments")
-public class Payment
-{
-
+public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private int id;    //auto or not....no idea
 
-    private boolean isPaymentCompleted;
+    private boolean paymentCompleted;
 
-
-    @Enumerated(value = EnumType.STRING)
     private PaymentMode paymentMode;
 
-
-    @OneToOne(mappedBy = "payment",cascade = CascadeType.ALL)
+    @OneToOne
+    @JoinColumn
     private Reservation reservation;
+
 
     public Payment() {
     }
 
-    public Payment(int id, boolean isPaymentCompleted, PaymentMode paymentMode) {
-        this.id = id;
-        this.isPaymentCompleted = isPaymentCompleted;
+    public Payment(boolean paymentCompleted, PaymentMode paymentMode, Reservation reservation) {
+        this.paymentCompleted = paymentCompleted;
         this.paymentMode = paymentMode;
+        this.reservation = reservation;
     }
 
+    public Payment(boolean paymentCompleted, PaymentMode paymentMode) {
+        this.paymentCompleted = paymentCompleted;
+        this.paymentMode = paymentMode;
+    }
 
     public int getId() {
         return id;
@@ -40,11 +40,11 @@ public class Payment
     }
 
     public boolean isPaymentCompleted() {
-        return isPaymentCompleted;
+        return paymentCompleted;
     }
 
     public void setPaymentCompleted(boolean paymentCompleted) {
-        isPaymentCompleted = paymentCompleted;
+        this.paymentCompleted = paymentCompleted;
     }
 
     public PaymentMode getPaymentMode() {
@@ -62,12 +62,4 @@ public class Payment
     public void setReservation(Reservation reservation) {
         this.reservation = reservation;
     }
-
-    //    public List<Reservation> getReservationList() {
-//        return reservationList;
-//    }
-//
-//    public void setReservationList(List<Reservation> reservationList) {
-//        this.reservationList = reservationList;
-//    }
 }

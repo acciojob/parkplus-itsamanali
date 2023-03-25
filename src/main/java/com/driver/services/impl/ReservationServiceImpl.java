@@ -9,6 +9,7 @@ import com.driver.services.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,8 +22,70 @@ public class ReservationServiceImpl implements ReservationService {
     ReservationRepository reservationRepository3;
     @Autowired
     ParkingLotRepository parkingLotRepository3;
-    @Override
-    public Reservation reserveSpot(Integer userId, Integer parkingLotId, Integer timeInHours, Integer numberOfWheels) throws Exception {
 
+    @Override
+    public  Reservation reserveSpot(Integer userId, Integer parkingLotId, Integer timeInHours, Integer numberOfWheels) throws Exception {
+        try{
+            ParkingLot parkingLot = parkingLotRepository3.findById(parkingLotId).get();
+
+            User user = userRepository3.findById(userId).get();
+
+            if(parkingLot==null || user==null){
+                throw new Exception("Cannot make reservation");
+            }
+
+            List<Spot> spotList = parkingLot.getSpotList();
+
+            Integer minBill = Integer.MAX_VALUE;
+
+            Spot reqspot=null;
+            for(Spot spot:spotList){
+                if(spotTypeFunction(spot.getSpotType())>=numberOfWheels && spot.getOccupied()==false && spot.getPricePerHour()*timeInHours<minBill){
+                    minBill=spot.getPricePerHour()*timeInHours;
+                    reqspot=spot;
+                }
+            }
+            if (reqspot==null){
+                throw new Exception("Cannot make reservation");
+            }
+
+            Reservation reservation = new Reservation(timeInHours);
+            reservation.setUser(user);
+            List<Reservation> reservationList = user.getReservationList();
+            if(reservationList==null){
+                reservationList = new ArrayList<>();
+            }
+            reservationList.add(reservation);
+            user.setReservationList(reservationList);
+
+
+            reservation.setSpot(reqspot);
+            List<Reservation> reservationList1 = reqspot.getReservationList();
+            if(reservationList1==null){
+                reservationList1 = new ArrayList<>();
+            }
+            reservationList1.add(reservation);
+            reqspot.setReservationList(reservationList1);
+            reqspot.setOccupied(true);
+
+            userRepository3.save(user);
+            spotRepository3.save(reqspot);
+
+            return reservation;
+
+        }catch (Exception e){
+            return null;
+        }
     }
+
+    public int spotTypeFunction(SpotType spotType){
+        if (spotType==SpotType.TWO_WHEELER){
+            return 2;
+        }
+        else if (spotType==SpotType.FOUR_WHEELER) {
+            return 4;
+        }
+        else return Integer.MAX_VALUE;
+    }
+
 }
